@@ -1,16 +1,16 @@
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
-  const response = await updateSession(request);
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next();
 
   const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.supabase.co https://*.vercel-insights.com https://va.vercel-scripts.com https://www.googletagmanager.com;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline';
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    img-src 'self' blob: data: https://*.supabase.co https://api.dicebear.com;
+    img-src 'self' blob: data:;
     font-src 'self' data: https://fonts.gstatic.com;
-    connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel-insights.com https://va.vercel-scripts.com https://www.google-analytics.com https://stats.g.doubleclick.net;
+    connect-src 'self';
     frame-src 'self';
     media-src 'self' blob: data:;
     object-src 'none';

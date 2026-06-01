@@ -1,9 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Suspense, type ReactNode, useState } from "react";
-import { AnalyticsProvider } from "@/components/analytics-provider";
-
+import { type ReactNode, useState } from "react";
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -20,9 +18,6 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <Suspense fallback={null}>
-        <AnalyticsProvider />
-      </Suspense>
     </QueryClientProvider>
   );
 }

@@ -1,5 +1,5 @@
-import { LandingPage } from "@/components/landing-page";
+import { WorkspaceShell } from "@/components/velocity/workspace-shell";
 
 export default function Home() {
-  return <LandingPage />;
+  return <WorkspaceShell />;
 }

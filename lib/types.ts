@@ -19,12 +19,10 @@ export type ThemeMode =
   | "racing";
 
 export type BackgroundEffect =
-  | "aurora"
-  | "stars"
-  | "racingLights"
-  | "cyberGrid"
-  | "rain"
-  | "neonParticles";
+  | "highway"
+  | "garage"
+  | "track"
+  | "minimal";
 
 export type Task = {
   id: string;

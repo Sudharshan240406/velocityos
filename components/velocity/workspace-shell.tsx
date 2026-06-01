@@ -1,561 +1,560 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import clsx from "clsx";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  BrainCircuit,
-  CarFront,
-  Gauge,
-  Home,
-  LayoutDashboard,
-  NotebookPen,
+  Play,
+  Pause,
+  RotateCcw,
+  SkipForward,
   Settings2,
-  Signal,
-  Users,
-  Wrench,
+  Download,
+  Volume2,
+  VolumeX,
+  X,
+  Flame,
+  Award,
+  Calendar,
 } from "lucide-react";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { loadNotes, loadSessions, saveNotes, saveSessions } from "@/lib/idb";
-import { trackEvent } from "@/lib/analytics";
-import { backgroundEffects, navItems } from "@/lib/data";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { buildDailyData, buildMonthlyTrend, formatTimer, getCurrentVehicle, getGreeting, getTodayMinutes } from "@/lib/velocity-utils";
-import { useSoundscape } from "@/hooks/use-soundscape";
 import { useFocusStore } from "@/stores/focus-store";
 import { BackgroundEffects } from "@/components/velocity/background-effects";
-import { GlassCard, StatCard } from "@/components/velocity/ui";
-import type { AppView, UserProfile } from "@/lib/types";
+import { CompletionOverlay } from "@/components/velocity/sections/completion-overlay";
+import type { BackgroundEffect } from "@/lib/types";
 
-const TimerPanel = dynamic(() => import("./sections/timer-panel").then((mod) => mod.TimerPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Booting telemetry dashboard" />,
-});
-const DashboardPanel = dynamic(() => import("./sections/dashboard-panel").then((mod) => mod.DashboardPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading dashboard" />,
-});
-const TasksPanel = dynamic(() => import("./sections/tasks-panel").then((mod) => mod.TasksPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading task controls" />,
-});
-const AnalyticsPanel = dynamic(() => import("./sections/analytics-panel").then((mod) => mod.AnalyticsPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading analytics" />,
-});
-const GaragePanel = dynamic(() => import("./sections/garage-panel").then((mod) => mod.GaragePanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading garage" />,
-});
-const CoachPanel = dynamic(() => import("./sections/coach-panel").then((mod) => mod.CoachPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading AI Driver Coach" />,
-});
-const NotesPanel = dynamic(() => import("./sections/notes-panel").then((mod) => mod.NotesPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading notes" />,
-});
-const SocialPanel = dynamic(() => import("./sections/social-panel").then((mod) => mod.SocialPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading social systems" />,
-});
-const SettingsPanel = dynamic(() => import("./sections/settings-panel").then((mod) => mod.SettingsPanel), {
-  ssr: false,
-  loading: () => <SectionLoading label="Loading settings" />,
-});
-const CompletionOverlay = dynamic(
-  () => import("./sections/completion-overlay").then((mod) => mod.CompletionOverlay),
-  { ssr: false },
-);
-const CloudSyncProvider = dynamic(
-  () => import("@/components/cloud-sync-provider").then((mod) => mod.CloudSyncProvider),
-  { ssr: false },
-);
+interface DeferredInstallPrompt {
+  prompt: () => void;
+  userChoice: Promise<{ outcome: string }>;
+}
 
-const navIcons = {
-  timer: Gauge,
-  dashboard: LayoutDashboard,
-  tasks: Wrench,
-  analytics: Signal,
-  garage: CarFront,
-  coach: BrainCircuit,
-  notes: NotebookPen,
-  social: Users,
-  settings: Settings2,
-} satisfies Record<AppView, React.ComponentType<{ className?: string }>>;
+// Synthesis of futuristic cockpit sound effects using HTML5 Web Audio API
+const playSynthSound = (type: "click" | "startup" | "complete", enabled: boolean) => {
+  if (!enabled || typeof window === "undefined") return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
 
-export function WorkspaceShell({
-  demoMode = false,
-  userProfile = null,
-}: {
-  demoMode?: boolean;
-  userProfile?: UserProfile | null;
-}) {
-  const router = useRouter();
+    if (type === "click") {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(900, ctx.currentTime);
+      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } else if (type === "startup") {
+      const osc = ctx.createOscillator();
+      const filter = ctx.createBiquadFilter();
+      const gain = ctx.createGain();
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(35, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.12);
+      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.7);
+
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(140, ctx.currentTime);
+
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.0);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 1.0);
+    } else if (type === "complete") {
+      const now = ctx.currentTime;
+      [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + i * 0.07);
+        gain.gain.setValueAtTime(0.0, now);
+        gain.gain.linearRampToValueAtTime(0.05, now + i * 0.07 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.7);
+        osc.start(now + i * 0.07);
+        osc.stop(now + i * 0.07 + 0.7);
+      });
+    }
+  } catch (err) {
+    console.error("Synthesizer failed:", err);
+  }
+};
+
+const formatTimer = (sec: number) => {
+  const m = Math.floor(sec / 60).toString().padStart(2, "0");
+  const s = (sec % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+};
+
+export function WorkspaceShell() {
   const {
-    activeView,
     timerMode,
     timerSecondsLeft,
     timerTotalSeconds,
     timerRunning,
     sessionsCompletedInCycle,
-    totalPomodoros,
+    totalSessionsCompleted,
     streak,
-    xp,
-    level,
-    tasks,
-    notes,
-    sessionLogs,
+    todayFocusMinutes,
+    weekFocusMinutes,
     settings,
     completionModalOpen,
     completionReward,
-    unlockedVehicleIds,
-    profile,
-    socialEnabled,
-    isDemoMode,
-    setActiveView,
-    setTimerMode,
     tick,
     startTimer,
     pauseTimer,
     resetTimer,
     skipSession,
     completeSession,
-    addTask,
-    toggleTask,
-    deleteTask,
-    reorderTasks,
-    addNote,
-    updateNote,
-    setNotes,
-    setSessionLogs,
     updateSettings,
     closeCompletionModal,
-    enableSocialPreview,
-    activateDemoMode,
-    setProfile,
   } = useFocusStore();
-  const { enabled, setEnabled, track, setTrack, volume, setVolume, playSuccess } = useSoundscape();
-  const [taskInput, setTaskInput] = useState("");
-  const [activeNoteId, setActiveNoteId] = useState(notes[0]?.id ?? "");
-  const [noteSearch, setNoteSearch] = useState("");
-  const deferredNoteSearch = useDeferredValue(noteSearch);
-  const [widgetMinimized, setWidgetMinimized] = useState(false);
-  const [widgetPosition, setWidgetPosition] = useState({ x: 24, y: 24 });
-  const completionHandledRef = useRef(false);
-  const dragOriginRef = useRef({ x: 0, y: 0 });
-  const draggingRef = useRef(false);
 
-  const dailyData = useMemo(() => buildDailyData(sessionLogs), [sessionLogs]);
-  const monthlyData = useMemo(() => buildMonthlyTrend(sessionLogs), [sessionLogs]);
-  const totalMinutesToday = useMemo(() => getTodayMinutes(sessionLogs), [sessionLogs]);
-  const weeklyMinutes = useMemo(() => dailyData.reduce((sum, item) => sum + item.minutes, 0), [dailyData]);
-  const productivityScore = Math.min(100, Math.round((weeklyMinutes / 600) * 100));
-  const focusScore = Math.min(100, Math.round((streak / 30) * 100));
-  const currentVehicle = useMemo(() => getCurrentVehicle(level), [level]);
-  const filteredNotes = useMemo(() => {
-    if (!deferredNoteSearch.trim()) {
-      return notes;
-    }
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hudActive, setHudActive] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<DeferredInstallPrompt | null>(null);
 
-    const query = deferredNoteSearch.toLowerCase();
-    return notes.filter(
-      (note) =>
-        note.title.toLowerCase().includes(query) ||
-        note.content.toLowerCase().includes(query) ||
-        note.tags.some((tag) => tag.toLowerCase().includes(query)),
-    );
-  }, [deferredNoteSearch, notes]);
-  const activeNote = notes.find((note) => note.id === activeNoteId) ?? notes[0];
-  const progress = timerTotalSeconds === 0 ? 0 : 1 - timerSecondsLeft / timerTotalSeconds;
-
+  // Sync ticker interval
   useEffect(() => {
-    if (demoMode && !isDemoMode) {
-      activateDemoMode();
-    }
-  }, [activateDemoMode, demoMode, isDemoMode]);
-
-  useEffect(() => {
-    if (userProfile) {
-      setProfile(userProfile);
-    }
-  }, [setProfile, userProfile]);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
+    const interval = setInterval(() => {
       tick();
     }, 1000);
-
-    return () => window.clearInterval(interval);
+    return () => clearInterval(interval);
   }, [tick]);
 
+  // Handle countdown complete chimes
   useEffect(() => {
-    if (timerSecondsLeft === 0 && !completionHandledRef.current) {
-      completionHandledRef.current = true;
+    if (timerSecondsLeft === 0 && timerRunning) {
       completeSession();
-      playSuccess();
-      trackEvent("session_complete", {
-        mode: timerMode,
-      });
-      return;
+      playSynthSound("complete", settings.soundEnabled);
     }
+  }, [timerSecondsLeft, timerRunning, completeSession, settings.soundEnabled]);
 
-    if (timerSecondsLeft > 0) {
-      completionHandledRef.current = false;
-    }
-  }, [completeSession, playSuccess, timerMode, timerSecondsLeft]);
-
+  // Capture PWA Install trigger
   useEffect(() => {
-    if (activeView === "coach") {
-      trackEvent("ai_coach_usage", { source: "workspace" });
-    }
-  }, [activeView]);
-
-  useEffect(() => {
-    if (completionReward?.unlockedVehicle) {
-      trackEvent("garage_unlock", {
-        vehicle: completionReward.unlockedVehicle.name,
-      });
-    }
-
-    if (completionReward && completionReward.currentStreak % 7 === 0) {
-      trackEvent("achievement_unlock", {
-        achievement: "consistency",
-        streak: completionReward.currentStreak,
-      });
-    }
-  }, [completionReward]);
-
-  useEffect(() => {
-    void loadSessions().then((storedSessions) => {
-      if (storedSessions.length > 0) {
-        setSessionLogs(storedSessions);
-      }
-    });
-    void loadNotes().then((storedNotes) => {
-      if (storedNotes.length > 0) {
-        setNotes(storedNotes);
-        setActiveNoteId(storedNotes[0]?.id ?? "");
-      }
-    });
-  }, [setNotes, setSessionLogs]);
-
-  useEffect(() => {
-    void saveSessions(sessionLogs);
-  }, [sessionLogs]);
-
-  useEffect(() => {
-    void saveNotes(notes);
-  }, [notes]);
-
-  useEffect(() => {
-    const handleMove = (event: MouseEvent) => {
-      if (!draggingRef.current) {
-        return;
-      }
-
-      setWidgetPosition((current) => ({
-        x: Math.max(16, current.x - (event.clientX - dragOriginRef.current.x)),
-        y: Math.max(16, current.y - (event.clientY - dragOriginRef.current.y)),
-      }));
-      dragOriginRef.current = { x: event.clientX, y: event.clientY };
+    const handlePrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as unknown as DeferredInstallPrompt);
     };
-
-    const handleUp = () => {
-      draggingRef.current = false;
-    };
-
-    window.addEventListener("mousemove", handleMove);
-    window.addEventListener("mouseup", handleUp);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMove);
-      window.removeEventListener("mouseup", handleUp);
-    };
+    window.addEventListener("beforeinstallprompt", handlePrompt);
+    return () => window.removeEventListener("beforeinstallprompt", handlePrompt);
   }, []);
 
+  const triggerInstall = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") {
+      setDeferredPrompt(null);
+    }
+  };
+
+  // Speedometer metrics
+  const progress = timerTotalSeconds === 0 ? 0 : 1 - timerSecondsLeft / timerTotalSeconds;
+  const speed = Math.round(28 + progress * 72);
+  const rpm = Math.round(1200 + progress * 6300);
+  const turbo = Math.round(25 + progress * 75);
+  const nitro = Math.max(10, Math.round(70 - progress * 35));
+  const needleAngle = -120 + progress * 240;
+
+  const handleActionClick = (action: () => void) => {
+    playSynthSound("click", settings.soundEnabled);
+    action();
+  };
+
   return (
-    <div className="relative min-h-screen overflow-hidden px-4 py-5 sm:px-6 lg:px-8">
-      <CloudSyncProvider />
+    <div className="relative min-h-screen text-white select-none overflow-x-hidden font-[family:var(--font-body)]">
+      {/* Dynamic cockpit lighting */}
       <BackgroundEffects effect={settings.backgroundEffect} />
-      {completionModalOpen && completionReward ? <CompletionOverlay reward={completionReward} onClose={closeCompletionModal} /> : null}
-      <div className="relative mx-auto grid max-w-[1680px] gap-4 lg:grid-cols-[300px_minmax(0,1fr)]">
-        <aside className="hidden lg:flex lg:flex-col lg:gap-4">
-          <GlassCard className="p-5">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.24em] text-white/55 transition hover:text-white">
-              <Home className="h-4 w-4" />
-              Landing Page
-            </Link>
-            <div className="mt-5 flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-orange-400 via-rose-500 to-cyan-400 text-lg font-bold text-slate-950 shadow-[0_0_30px_rgba(255,99,71,0.2)]">
-                V
+
+      {/* Main Container */}
+      <div className="relative z-10 mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8 flex flex-col justify-between min-h-screen">
+        
+        {/* Header */}
+        <header className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div>
+            <h1 className="font-[family:var(--font-display)] text-2xl tracking-[0.24em] text-white">VELOCITYOS</h1>
+            <p className="text-xs uppercase tracking-[0.26em] text-orange-200 mt-1">AUTOMOTIVE FOCUS ENGINE</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {deferredPrompt && (
+              <button
+                type="button"
+                onClick={triggerInstall}
+                className="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-400/10 px-4 py-2 text-xs uppercase tracking-[0.15em] text-orange-100 hover:bg-orange-400/20 transition"
+              >
+                <Download className="h-4 w-4" />
+                Install App
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => handleActionClick(() => setHudActive((v) => !v))}
+              className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.15em] transition ${
+                hudActive ? "border-cyan-400 bg-cyan-400/10 text-cyan-300" : "border-white/10 text-white hover:bg-white/5"
+              }`}
+            >
+              HUD Mode
+            </button>
+            <button
+              type="button"
+              onClick={() => handleActionClick(() => setSettingsOpen(true))}
+              className="rounded-full border border-white/10 p-2 text-white hover:bg-white/5 transition"
+              aria-label="Open cockpit configuration"
+            >
+              <Settings2 className="h-4 w-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Dashboard Speedometer Screen */}
+        <main className="my-auto py-10 flex flex-col items-center">
+          
+          {/* Large dashboard telemetry display */}
+          <div className="relative w-full max-w-[460px] aspect-[4/3] flex items-center justify-center">
+            
+            {/* Porsche speedometer rings */}
+            <svg viewBox="0 0 420 320" className="absolute inset-0 w-full h-full">
+              {/* Speedometer track */}
+              <path
+                d="M 60 250 A 150 150 0 1 1 360 250"
+                fill="none"
+                stroke="rgba(255, 255, 255, 0.05)"
+                strokeWidth="18"
+                strokeLinecap="round"
+              />
+              <path
+                d="M 60 250 A 150 150 0 1 1 360 250"
+                fill="none"
+                stroke="url(#speedo-grad)"
+                strokeWidth="18"
+                strokeLinecap="round"
+                strokeDasharray="470"
+                strokeDashoffset={470 - 470 * progress}
+                className="transition-all duration-300 ease-out"
+              />
+
+              {/* Ticks and scale marks */}
+              <g stroke="rgba(255,255,255,0.15)" strokeWidth="2">
+                <line x1="210" y1="20" x2="210" y2="30" />
+                <line x1="60" y1="250" x2="70" y2="245" />
+                <line x1="360" y1="250" x2="350" y2="245" />
+              </g>
+
+              {/* Telemetry Dial Needle */}
+              <g transform={`translate(210, 200) rotate(${needleAngle})`} className="transition-all duration-300 ease-out">
+                <line x1="0" y1="0" x2="0" y2="-130" stroke="#f43f5e" strokeWidth="4" strokeLinecap="round" />
+                <circle cx="0" cy="0" r="10" fill="#fff" />
+              </g>
+
+              <defs>
+                <linearGradient id="speedo-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#22d3ee" />
+                  <stop offset="60%" stopColor="#ec4899" />
+                  <stop offset="100%" stopColor="#fb923c" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Speeds and Digital Countdown inside Dial */}
+            <div className="absolute top-[38%] flex flex-col items-center text-center">
+              <span className="text-xs uppercase tracking-[0.3em] text-white/35">
+                {timerMode === "focus" ? "Velocity Run" : timerMode === "shortBreak" ? "Pit Stop" : "Cooldown"}
+              </span>
+              <span className="font-[family:var(--font-display)] text-6xl md:text-7xl font-bold tracking-tight text-white mt-2">
+                {formatTimer(timerSecondsLeft)}
+              </span>
+              <span className="text-xs text-white/40 tracking-[0.15em] mt-3">
+                Laps Completed: {Math.min(sessionsCompletedInCycle, 4)} / 4
+              </span>
+            </div>
+          </div>
+
+          {/* Telemetry Gauges Deck */}
+          <div className="grid grid-cols-4 gap-3 w-full max-w-lg mt-6 px-2">
+            {[
+              { label: "Speed", value: `${speed} MPH` },
+              { label: "RPM", value: rpm },
+              { label: "Turbo", value: `${turbo}%` },
+              { label: "Nitro", value: `${nitro}%` },
+            ].map((metric) => (
+              <div key={metric.label} className="rounded-[20px] border border-white/10 bg-slate-950/40 p-3 text-center backdrop-blur-md">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/35">{metric.label}</p>
+                <p className="mt-1 font-[family:var(--font-display)] text-sm sm:text-lg text-white">{metric.value}</p>
               </div>
+            ))}
+          </div>
+
+          {/* Timer Modes Preset Toggles */}
+          <div className="flex gap-2.5 mt-8 w-full justify-center px-4">
+            {[
+              { label: "25m / 5m", focus: 25, short: 5, long: 15 },
+              { label: "50m / 10m", focus: 50, short: 10, long: 20 },
+              { label: "90m / 20m", focus: 90, short: 20, long: 30 },
+            ].map((preset) => {
+              const active = settings.focusMinutes === preset.focus && settings.shortBreakMinutes === preset.short;
+              return (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() =>
+                    handleActionClick(() => {
+                      updateSettings({
+                        focusMinutes: preset.focus,
+                        shortBreakMinutes: preset.short,
+                        longBreakMinutes: preset.long,
+                      });
+                    })
+                  }
+                  className={`rounded-full px-5 py-2 text-xs font-semibold tracking-wider transition ${
+                    active ? "bg-white text-slate-950 shadow-md" : "border border-white/10 text-white/80 hover:bg-white/5"
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Ignition Controls */}
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <button
+              type="button"
+              onClick={() => handleActionClick(timerRunning ? pauseTimer : startTimer)}
+              className="flex items-center gap-3 rounded-full bg-linear-to-r from-orange-400 via-rose-500 to-cyan-400 px-8 py-4 font-semibold text-slate-950 shadow-[0_0_35px_rgba(255,99,71,0.25)] hover:scale-[1.03] transition"
+            >
+              {timerRunning ? <Pause className="h-5 w-5 fill-slate-950" /> : <Play className="h-5 w-5 fill-slate-950" />}
+              {timerRunning ? "Pause" : "Ignite"}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleActionClick(resetTimer)}
+              className="rounded-full border border-white/10 p-4 text-white/85 hover:bg-white/5 transition"
+              aria-label="Reset telemetry countdown"
+            >
+              <RotateCcw className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleActionClick(skipSession)}
+              className="rounded-full border border-white/10 p-4 text-white/85 hover:bg-white/5 transition"
+              aria-label="Skip break to next run"
+            >
+              <SkipForward className="h-5 w-5" />
+            </button>
+          </div>
+        </main>
+
+        {/* Focus Stats Deck */}
+        <section className="grid grid-cols-4 gap-2 border-t border-white/10 pt-6 pb-4">
+          {[
+            { label: "Focused Today", value: `${todayFocusMinutes}m`, icon: Calendar },
+            { label: "Focused Week", value: `${weekFocusMinutes}m`, icon: Calendar },
+            { label: "Runs Completed", value: totalSessionsCompleted, icon: Award },
+            { label: "Current Streak", value: `${streak}d`, icon: Flame },
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div key={stat.label} className="flex flex-col items-center text-center p-1">
+                <div className="flex items-center justify-center gap-1 text-[9px] sm:text-[11px] uppercase tracking-[0.16em] text-white/40">
+                  <Icon className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">{stat.label}</span>
+                  <span className="sm:hidden">{stat.label.split(" ")[0]}</span>
+                </div>
+                <p className="mt-2 font-[family:var(--font-display)] text-lg sm:text-2xl text-white font-semibold">
+                  {stat.value}
+                </p>
+              </div>
+            );
+          })}
+        </section>
+
+      </div>
+
+      {/* Settings Drawer */}
+      <AnimatePresence>
+        {settingsOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSettingsOpen(false)}
+              className="fixed inset-0 z-40 bg-black"
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "tween", duration: 0.28 }}
+              className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-sm border-l border-white/10 bg-slate-950/95 p-6 backdrop-blur-xl flex flex-col justify-between"
+            >
               <div>
-                <p className="font-[family:var(--font-display)] text-2xl tracking-[0.26em] text-white">VELOCITYOS</p>
-                <p className="text-sm text-white/45">Gamified Deep Work for Future Builders</p>
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard className="p-3">
-            <div className="space-y-2">
-              {navItems.map((item) => {
-                const Icon = navIcons[item.id];
-                const active = activeView === item.id;
-                return (
+                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                  <div>
+                    <h3 className="font-[family:var(--font-display)] text-lg tracking-wider">CONFIGURATION</h3>
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-orange-200 mt-1">Tuning parameters</p>
+                  </div>
                   <button
-                    key={item.id}
                     type="button"
-                    onClick={() => setActiveView(item.id)}
-                    className={clsx(
-                      "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left transition",
-                      active
-                        ? "bg-white/10 text-white shadow-[0_0_24px_rgba(255,99,71,0.18)]"
-                        : "text-white/70 hover:bg-white/5",
-                    )}
+                    onClick={() => handleActionClick(() => setSettingsOpen(false))}
+                    className="text-white/60 hover:text-white"
                   >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
+                    <X className="h-5 w-5" />
                   </button>
-                );
-              })}
-            </div>
-          </GlassCard>
+                </div>
 
-          <GlassCard className="space-y-5 p-5">
+                {/* Duration Config Sliders */}
+                <div className="mt-6 space-y-5">
+                  {[
+                    { key: "focusMinutes", label: "Focus Sprint (Min)", min: 5, max: 120 },
+                    { key: "shortBreakMinutes", label: "Short Pit Stop (Min)", min: 1, max: 30 },
+                    { key: "longBreakMinutes", label: "Long Break Cooldown (Min)", min: 5, max: 60 },
+                  ].map((field) => {
+                    const settingsKey = field.key as keyof typeof settings;
+                    return (
+                      <div key={field.key} className="rounded-[20px] border border-white/10 bg-black/30 p-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <label htmlFor={`field-${field.key}`} className="text-white/70">{field.label}</label>
+                          <span className="font-semibold text-orange-300">{settings[settingsKey]}m</span>
+                        </div>
+                        <input
+                          id={`field-${field.key}`}
+                          type="range"
+                          min={field.min}
+                          max={field.max}
+                          value={settings[settingsKey] as number}
+                          onChange={(e) => updateSettings({ [field.key]: Number(e.target.value) })}
+                          className="mt-3 w-full accent-orange-400"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Ambient Environment Switch */}
+                <div className="mt-6">
+                  <h4 className="text-xs uppercase tracking-[0.2em] text-white/40">Atmosphere</h4>
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    {[
+                      { id: "highway", label: "Night Highway" },
+                      { id: "garage", label: "F1 Garage" },
+                      { id: "track", label: "Cyber Track" },
+                      { id: "minimal", label: "Minimal Mode" },
+                    ].map((env) => (
+                      <button
+                        key={env.id}
+                        type="button"
+                        onClick={() =>
+                          handleActionClick(() => updateSettings({ backgroundEffect: env.id as BackgroundEffect }))
+                        }
+                        className={`rounded-xl border px-3 py-2.5 text-xs text-center transition ${
+                          settings.backgroundEffect === env.id
+                            ? "border-orange-400 bg-orange-400/10 text-white"
+                            : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                        }`}
+                      >
+                        {env.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sound Settings */}
+                <div className="mt-6">
+                  <h4 className="text-xs uppercase tracking-[0.2em] text-white/40">Telemetry Sounds</h4>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleActionClick(() => updateSettings({ soundEnabled: !settings.soundEnabled }))
+                    }
+                    className={`mt-3 flex w-full items-center justify-center gap-2 rounded-full border py-3 text-xs uppercase tracking-wider transition ${
+                      settings.soundEnabled
+                        ? "border-cyan-400 bg-cyan-400/10 text-cyan-300"
+                        : "border-white/10 bg-white/5 text-white/70"
+                    }`}
+                  >
+                    {settings.soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                    {settings.soundEnabled ? "Ambience Enabled" : "Ambience Muted"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="text-center text-[10px] text-white/20 tracking-wider">
+                VELOCITYOS V2.0.0
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Checkered Flag celebration overlay popup */}
+      {completionModalOpen && completionReward && (
+        <CompletionOverlay reward={completionReward} onClose={closeCompletionModal} />
+      )}
+
+      {/* Draggable HUD Racing Widget Overlay */}
+      {hudActive && (
+        <motion.div
+          drag
+          dragMomentum={false}
+          className="fixed z-50 rounded-[28px] border border-orange-500/20 bg-slate-950/90 p-5 shadow-[0_0_35px_rgba(255,99,71,0.25)] cursor-grab active:cursor-grabbing w-[260px] text-white backdrop-blur-md"
+          initial={{ right: 24, bottom: 24 }}
+        >
+          <div className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
             <div>
-              <p className="text-xs uppercase tracking-[0.24em] text-white/40">Driver Profile</p>
-              <p className="mt-2 text-xl font-semibold text-white">{profile.name}</p>
-              <p className="text-sm text-white/45">Level {level} focus driver</p>
-            </div>
-            <div>
-              <div className="mb-2 flex justify-between text-xs uppercase tracking-[0.2em] text-white/40">
-                <span>Garage XP</span>
-                <span>{xp} XP</span>
-              </div>
-              <div className="h-3 rounded-full bg-white/5">
-                <div className="h-full rounded-full bg-linear-to-r from-orange-400 via-rose-500 to-cyan-400" style={{ width: `${Math.min(100, (xp % 120) / 1.2)}%` }} />
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-white/40">Current ride</p>
-                <p className="mt-2 text-lg text-white">{currentVehicle.name}</p>
-              </div>
-              <div className="rounded-[24px] border border-white/10 bg-black/20 p-4">
-                <p className="text-xs uppercase tracking-[0.22em] text-white/40">Streak</p>
-                <p className="mt-2 text-lg text-white">{streak} days</p>
-              </div>
+              <p className="text-[10px] uppercase tracking-[0.18em] text-white/45">TELEMETRY HUD</p>
+              <p className="text-xs text-white/80 font-bold">
+                {timerMode === "focus" ? "RUN SPRINT" : "PIT STOP"}
+              </p>
             </div>
             <button
               type="button"
-              onClick={async () => {
-                if (demoMode || isDemoMode) {
-                  await fetch("/api/demo", { method: "DELETE" });
-                } else {
-                  const supabase = createSupabaseBrowserClient();
-                  await supabase?.auth.signOut();
-                }
-                router.push("/auth");
-                router.refresh();
-              }}
-              className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 hover:bg-white/10"
+              onClick={() => handleActionClick(() => setHudActive(false))}
+              className="text-white/40 hover:text-white"
             >
-              {demoMode || isDemoMode ? "Exit Demo" : "Sign Out"}
+              <X className="h-4 w-4" />
             </button>
-          </GlassCard>
-        </aside>
-
-        <main className="relative space-y-4 pb-24 lg:pb-8">
-          <GlassCard className="p-5">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.32em] text-orange-200">Velocity Workspace</p>
-                <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">
-                  {getGreeting()}, {profile.name.split(" ")[0]}
-                </h1>
-                <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-300">
-                  You are inside a premium automotive-inspired productivity cockpit. Build momentum, earn unlocks,
-                  and keep the engine hot.
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <StatCard label="Focus Today" value={`${totalMinutesToday}m`} accent="text-cyan-300" />
-                <StatCard label="Garage Level" value={`${level}`} accent="text-orange-300" />
-                <StatCard label="Unlocked Cars" value={`${unlockedVehicleIds.length}/8`} accent="text-rose-300" />
-              </div>
-            </div>
-          </GlassCard>
-
-          {activeView === "timer" ? (
-            <TimerPanel
-              currentVehicle={currentVehicle}
-              progress={progress}
-              sessionsCompletedInCycle={sessionsCompletedInCycle}
-              taskCount={tasks.filter((task) => !task.completed).length}
-              timerMode={timerMode}
-              timerRunning={timerRunning}
-              timerSecondsLeft={timerSecondsLeft}
-              onModeChange={setTimerMode}
-              onPause={pauseTimer}
-              onReset={resetTimer}
-              onSkip={skipSession}
-              onStart={() => {
-                trackEvent("session_start", { mode: timerMode });
-                startTimer();
-              }}
-            />
-          ) : null}
-
-          {activeView === "dashboard" ? (
-            <DashboardPanel
-              currentVehicleName={currentVehicle.name}
-              focusScore={focusScore}
-              productivityScore={productivityScore}
-              streak={streak}
-              totalMinutesToday={totalMinutesToday}
-              totalPomodoros={totalPomodoros}
-              weeklyMinutes={weeklyMinutes}
-            />
-          ) : null}
-
-          {activeView === "tasks" ? (
-            <TasksPanel
-              input={taskInput}
-              tasks={tasks}
-              onChangeInput={setTaskInput}
-              onDeleteTask={deleteTask}
-              onDragEnd={reorderTasks}
-              onSubmitTask={() => {
-                if (taskInput.trim()) {
-                  addTask(taskInput.trim());
-                  setTaskInput("");
-                }
-              }}
-              onToggleTask={toggleTask}
-            />
-          ) : null}
-
-          {activeView === "analytics" ? (
-            <AnalyticsPanel dailyData={dailyData} monthlyData={monthlyData} sessionLogs={sessionLogs} />
-          ) : null}
-
-          {activeView === "garage" ? (
-            <GaragePanel level={level} unlockedVehicleIds={unlockedVehicleIds} xp={xp} />
-          ) : null}
-
-          {activeView === "coach" ? (
-            <CoachPanel
-              dailyData={dailyData}
-              focusMinutesToday={totalMinutesToday}
-              productivityScore={productivityScore}
-              streak={streak}
-              weeklyMinutes={weeklyMinutes}
-            />
-          ) : null}
-
-          {activeView === "notes" ? (
-            <NotesPanel
-              activeNote={activeNote}
-              filteredNotes={filteredNotes}
-              noteSearch={noteSearch}
-              onAddNote={addNote}
-              onChangeNoteSearch={setNoteSearch}
-              onSelectNote={setActiveNoteId}
-              onUpdateNote={updateNote}
-            />
-          ) : null}
-
-          {activeView === "social" ? (
-            <SocialPanel onEnablePreview={enableSocialPreview} profile={profile} socialEnabled={socialEnabled} />
-          ) : null}
-
-          {activeView === "settings" ? (
-            <SettingsPanel
-              availableEffects={backgroundEffects}
-              settings={settings}
-              track={track}
-              volume={volume}
-              onSetEnabled={setEnabled}
-              onSetTrack={setTrack}
-              onSetVolume={setVolume}
-              soundEnabled={enabled}
-              onUpdate={(patch) => {
-                if (patch.theme) {
-                  trackEvent("theme_usage", { theme: patch.theme });
-                }
-                updateSettings(patch);
-              }}
-            />
-          ) : null}
-        </main>
-      </div>
-
-      <div
-        style={{ right: widgetPosition.x, bottom: widgetPosition.y }}
-        className="velocity-panel fixed z-40 hidden w-[250px] rounded-[24px] p-4 shadow-[0_0_28px_rgba(255,99,71,0.16)] md:block"
-      >
-        <div
-          onMouseDown={(event) => {
-            draggingRef.current = true;
-            dragOriginRef.current = { x: event.clientX, y: event.clientY };
-          }}
-          className="mb-3 flex cursor-move items-center justify-between"
-        >
-          <div>
-            <p className="text-xs uppercase tracking-[0.28em] text-white/35">Floating Widget</p>
-            <p className="text-sm text-white/80">{timerMode === "focus" ? "Velocity Mode" : "Recovery"}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setWidgetMinimized((value) => !value)}
-            className="text-white/45 hover:text-white"
-            aria-label={widgetMinimized ? "Expand widget" : "Minimize widget"}
-          >
-            {widgetMinimized ? "+" : "-"}
-          </button>
-        </div>
-        {!widgetMinimized ? (
-          <>
-            <p className="font-[family:var(--font-display)] text-3xl text-white">{formatTimer(timerSecondsLeft)}</p>
-            <div className="mt-4 h-2 rounded-full bg-white/5">
-              <div className="h-full rounded-full bg-linear-to-r from-orange-400 via-rose-500 to-cyan-400" style={{ width: `${progress * 100}%` }} />
-            </div>
-          </>
-        ) : null}
-      </div>
 
-      <div className="fixed inset-x-3 bottom-3 z-30 rounded-[26px] border border-white/10 bg-slate-950/85 p-2 backdrop-blur xl:hidden">
-        <div className="grid grid-cols-5 gap-1">
-          {(["timer", "dashboard", "tasks", "garage", "settings"] as AppView[]).map((item) => {
-            const Icon = navIcons[item];
-            const active = activeView === item;
-            return (
+          <div className="flex items-end justify-between">
+            <span className="font-[family:var(--font-display)] text-3xl font-bold tracking-wider text-orange-400">
+              {formatTimer(timerSecondsLeft)}
+            </span>
+            <div className="flex gap-2">
               <button
-                key={item}
                 type="button"
-                onClick={() => setActiveView(item)}
-                className={clsx("rounded-2xl px-2 py-3 text-center text-xs", active ? "bg-white/10 text-white" : "text-white/45")}
+                onClick={() => handleActionClick(timerRunning ? pauseTimer : startTimer)}
+                className="rounded-full bg-white p-2 text-slate-950"
               >
-                <Icon className="mx-auto mb-1 h-4 w-4" />
-                {item === "timer" ? "Mode" : item.charAt(0).toUpperCase() + item.slice(1)}
+                {timerRunning ? <Pause className="h-3 w-3 fill-slate-950" /> : <Play className="h-3 w-3 fill-slate-950" />}
               </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
+              <button
+                type="button"
+                onClick={() => handleActionClick(resetTimer)}
+                className="rounded-full border border-white/10 p-2 hover:bg-white/5"
+              >
+                <RotateCcw className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
 
-function SectionLoading({ label }: { label: string }) {
-  return (
-    <GlassCard className="p-8">
-      <p className="text-sm uppercase tracking-[0.3em] text-orange-200">{label}</p>
-      <div className="mt-4 h-2 rounded-full bg-white/5">
-        <div className="h-full w-1/3 animate-pulse rounded-full bg-linear-to-r from-orange-400 via-rose-500 to-cyan-400" />
-      </div>
-    </GlassCard>
+          {/* Graphical RPM Bar in HUD */}
+          <div className="mt-3.5 h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
+            <div
+              className="h-full bg-linear-to-r from-orange-400 via-rose-500 to-cyan-400 transition-all duration-300"
+              style={{ width: `${progress * 100}%` }}
+            />
+          </div>
+        </motion.div>
+      )}
+    </div>
   );
 }

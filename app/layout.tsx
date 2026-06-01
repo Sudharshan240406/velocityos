@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Orbitron, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { PWARegister } from "@/components/pwa-register";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
-import { getSupabaseEnv } from "@/lib/env";
 
 const displayFont = Orbitron({
   variable: "--font-display",
@@ -25,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | VelocityOS",
   },
   description:
-    "VelocityOS is an automotive-inspired deep work platform with a supercar focus dashboard, garage progression, AI coaching, and offline-first productivity.",
+    "VelocityOS is an automotive-inspired supercar digital cockpit focus timer built for deep work and Pomodoro sprints.",
   applicationName: "VelocityOS",
   keywords: [
     "VelocityOS",
@@ -33,14 +29,14 @@ export const metadata: Metadata = {
     "productivity platform",
     "deep work",
     "focus timer",
-    "garage gamification",
+    "racing timer",
   ],
   alternates: {
     canonical: "https://velocityos.app",
   },
   openGraph: {
     title: "VelocityOS",
-    description: "Gamified Deep Work for Future Builders",
+    description: "Ultimate Automotive Pomodoro Timer",
     url: "https://velocityos.app",
     siteName: "VelocityOS",
     type: "website",
@@ -49,14 +45,14 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "VelocityOS automotive-inspired productivity platform",
+        alt: "VelocityOS supercar-inspired focus timer",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "VelocityOS",
-    description: "Gamified Deep Work for Future Builders",
+    description: "Ultimate Automotive Pomodoro Timer",
     images: ["/twitter-image"],
   },
   appleWebApp: {
@@ -71,8 +67,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { gaId } = getSupabaseEnv();
-
   return (
     <html
       lang="en"
@@ -87,7 +81,7 @@ export default function RootLayout({
               "@type": "WebApplication",
               "name": "VelocityOS",
               "url": "https://velocityos.app",
-              "description": "VelocityOS is an automotive-inspired deep work platform with a supercar focus dashboard, garage progression, AI coaching, and offline-first productivity.",
+              "description": "VelocityOS is an automotive-inspired supercar digital cockpit focus timer built for deep work and Pomodoro sprints.",
               "applicationCategory": "ProductivityApplication",
               "operatingSystem": "All",
               "browserRequirements": "Requires JavaScript. Requires HTML5.",
@@ -95,21 +89,11 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full">
+      <body className="min-h-full bg-slate-950 text-white">
         <Providers>
           {children}
           <PWARegister />
-          <Analytics />
-          <SpeedInsights />
         </Providers>
-        {gaId ? (
-          <>
-            <Script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} strategy="afterInteractive" />
-            <Script id="ga-boot" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} window.gtag = gtag; gtag('js', new Date()); gtag('config', '${gaId}', { send_page_view: false });`}
-            </Script>
-          </>
-        ) : null}
       </body>
     </html>
   );
