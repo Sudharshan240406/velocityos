@@ -43,7 +43,7 @@ const playSynthSound = (type: "click" | "startup" | "complete", enabled: boolean
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.type = "sine";
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.setValueAtTime(850, ctx.currentTime);
       gain.gain.setValueAtTime(0.04, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
       osc.start();
@@ -54,12 +54,12 @@ const playSynthSound = (type: "click" | "startup" | "complete", enabled: boolean
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.type = "sine";
-      osc.frequency.setValueAtTime(120, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.6);
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+      osc.frequency.setValueAtTime(110, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.5);
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
       osc.start();
-      osc.stop(ctx.currentTime + 0.6);
+      osc.stop(ctx.currentTime + 0.5);
     } else if (type === "complete") {
       const now = ctx.currentTime;
       [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
@@ -70,10 +70,10 @@ const playSynthSound = (type: "click" | "startup" | "complete", enabled: boolean
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, now + i * 0.08);
         gain.gain.setValueAtTime(0.0, now);
-        gain.gain.linearRampToValueAtTime(0.05, now + i * 0.08 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.8);
+        gain.gain.linearRampToValueAtTime(0.04, now + i * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.7);
         osc.start(now + i * 0.08);
-        osc.stop(now + i * 0.08 + 0.8);
+        osc.stop(now + i * 0.08 + 0.7);
       });
     }
   } catch (err) {
@@ -161,25 +161,25 @@ export function WorkspaceShell() {
   };
 
   return (
-    <div className="relative min-h-screen text-white select-none overflow-x-hidden font-[family:var(--font-body)] bg-[#02040a]">
-      {/* Cinematic animated mountains, sky and aurora background */}
+    <div className="relative min-h-screen text-white select-none overflow-x-hidden font-[family:var(--font-body)] bg-[#020108]">
+      {/* Cinematic animated nebula sky and parallax mountain background */}
       <BackgroundEffects effect={settings.backgroundEffect} />
 
-      {/* Main Responsive Grid Layout */}
-      <div className="relative z-10 mx-auto max-w-[1440px] min-h-screen p-4 md:p-6 flex flex-col justify-between">
+      {/* Main Container */}
+      <div className="relative z-10 mx-auto max-w-[1400px] min-h-screen p-4 md:p-6 flex flex-col justify-between">
         
         {/* Header Block */}
-        <header className="flex items-center justify-between border-b border-white/10 pb-4 backdrop-blur-xs">
+        <header className="flex items-center justify-between border-b border-white/5 pb-4 backdrop-blur-xs">
           <div>
-            <h1 className="font-[family:var(--font-display)] text-xl tracking-[0.24em] text-white">VELOCITYOS</h1>
-            <p className="text-[10px] uppercase tracking-[0.26em] text-orange-200 mt-1">CINEMATIC FOCUS OPERATING SYSTEM</p>
+            <h1 className="font-[family:var(--font-display)] text-2xl tracking-[0.28em] bg-linear-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">VELOCITYOS</h1>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-cyan-300 mt-1">Focus Operating System</p>
           </div>
           <div className="flex items-center gap-3">
             {deferredPrompt && (
               <button
                 type="button"
                 onClick={triggerInstall}
-                className="inline-flex items-center gap-2 rounded-full border border-orange-400/20 bg-orange-400/10 px-4 py-2 text-xs uppercase tracking-[0.15em] text-orange-100 hover:bg-orange-400/20 transition"
+                className="inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-4 py-2 text-xs uppercase tracking-[0.15em] text-purple-200 hover:bg-purple-500/20 transition shadow-[0_0_15px_rgba(168,85,247,0.15)]"
               >
                 <Download className="h-3.5 w-3.5" />
                 Install App
@@ -189,16 +189,16 @@ export function WorkspaceShell() {
               type="button"
               onClick={() => handleActionClick(() => setHudActive((v) => !v))}
               className={`rounded-full border px-4 py-2 text-xs uppercase tracking-[0.15em] transition ${
-                hudActive ? "border-cyan-400 bg-cyan-400/10 text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.2)]" : "border-white/10 text-white hover:bg-white/5"
+                hudActive ? "border-cyan-400 bg-cyan-400/15 text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)]" : "border-white/10 text-white hover:bg-white/5"
               }`}
             >
-              Pop HUD
+              Telemetry HUD
             </button>
             <button
               type="button"
               onClick={() => handleActionClick(() => setSettingsOpen(true))}
               className="rounded-full border border-white/10 p-2 text-white hover:bg-white/5 transition"
-              aria-label="Open settings panel"
+              aria-label="Open configuration panel"
             >
               <Settings2 className="h-4 w-4" />
             </button>
@@ -206,17 +206,17 @@ export function WorkspaceShell() {
         </header>
 
         {/* 3-Column Cockpit Workspace */}
-        <div className="grid gap-6 py-6 lg:grid-cols-[280px_1fr_280px] flex-1 items-stretch">
+        <div className="grid gap-6 py-8 lg:grid-cols-[290px_1fr_290px] flex-1 items-stretch">
           
           {/* LEFT SIDEBAR: Presets & Atmospheres */}
-          <aside className="hidden lg:flex lg:flex-col lg:gap-4 justify-between">
+          <aside className="hidden lg:flex lg:flex-col lg:gap-5 justify-between">
             {/* Session Preset Selector */}
-            <div className="rounded-[28px] border border-white/10 bg-slate-950/30 p-5 backdrop-blur-md">
+            <div className="rounded-[30px] border border-white/10 bg-linear-to-b from-white/5 to-transparent p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
-                <Compass className="h-4 w-4 text-orange-200" />
-                <p className="text-xs uppercase tracking-[0.2em] text-white/50">Run Presets</p>
+                <Compass className="h-4 w-4 text-purple-300" />
+                <p className="text-[10px] uppercase tracking-[0.25em] text-purple-300 font-semibold">Run Presets</p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[
                   { label: "Sprint (25m / 5m)", focus: 25, short: 5, long: 15 },
                   { label: "Deep Sprints (50m / 10m)", focus: 50, short: 10, long: 20 },
@@ -236,8 +236,10 @@ export function WorkspaceShell() {
                           });
                         })
                       }
-                      className={`w-full rounded-2xl border p-3.5 text-left text-xs tracking-wider transition ${
-                        active ? "border-orange-400 bg-orange-400/10 text-white" : "border-white/5 bg-white/5 text-white/70 hover:bg-white/10"
+                      className={`w-full rounded-2xl border p-4 text-left text-xs tracking-wider transition hover:scale-[1.02] ${
+                        active
+                          ? "border-purple-400 bg-purple-500/10 text-white shadow-[0_0_20px_rgba(168,85,247,0.2)]"
+                          : "border-white/5 bg-white/5 text-white/70 hover:bg-white/10"
                       }`}
                     >
                       {preset.label}
@@ -248,12 +250,12 @@ export function WorkspaceShell() {
             </div>
 
             {/* Atmosphere selection */}
-            <div className="rounded-[28px] border border-white/10 bg-slate-950/30 p-5 backdrop-blur-md">
+            <div className="rounded-[30px] border border-white/10 bg-linear-to-b from-white/5 to-transparent p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
                 <Tv className="h-4 w-4 text-cyan-300" />
-                <p className="text-xs uppercase tracking-[0.2em] text-white/50">Atmosphere</p>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-cyan-300 font-semibold">Atmosphere</p>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 {[
                   { id: "highway", label: "Night Highway" },
                   { id: "garage", label: "F1 Garage" },
@@ -266,9 +268,9 @@ export function WorkspaceShell() {
                     onClick={() =>
                       handleActionClick(() => updateSettings({ backgroundEffect: env.id as BackgroundEffect }))
                     }
-                    className={`rounded-xl border px-2 py-3 text-[10px] text-center transition ${
+                    className={`rounded-2xl border px-2 py-3.5 text-[10px] text-center transition hover:scale-[1.03] ${
                       settings.backgroundEffect === env.id
-                        ? "border-orange-400 bg-orange-400/10 text-white"
+                        ? "border-cyan-400 bg-cyan-400/10 text-white shadow-[0_0_15px_rgba(6,182,212,0.2)]"
                         : "border-white/5 bg-white/5 text-white/70 hover:bg-white/10"
                     }`}
                   >
@@ -279,80 +281,109 @@ export function WorkspaceShell() {
             </div>
           </aside>
 
-          {/* CENTER PANEL: Giant Neon Timer Ring */}
+          {/* CENTER PANEL: Fusion Reactor Timer */}
           <section className="flex flex-col items-center justify-center p-4">
             
             {/* The circular glowing timer centerpiece */}
-            <div className="relative w-full max-w-[380px] sm:max-w-[420px] aspect-square flex items-center justify-center">
+            <div className="relative w-full max-w-[400px] sm:max-w-[440px] aspect-square flex items-center justify-center">
               
-              {/* Outer neon glow ring */}
-              <div className="absolute inset-2 rounded-full border border-white/5 shadow-[inset_0_0_40px_rgba(255,255,255,0.02)]" />
+              {/* Outer neon halo / bloom ring */}
+              <div className="absolute inset-0 rounded-full border border-purple-500/10 bg-purple-500/2 animate-[pulse_4s_ease-in-out_infinite] shadow-[0_0_50px_rgba(168,85,247,0.12),inset_0_0_50px_rgba(168,85,247,0.12)]" />
               
-              {/* Glowing SVG Energy Loop */}
+              {/* Glowing SVG Energy Loops (layered for bloom effects) */}
               <svg viewBox="0 0 300 300" className="absolute inset-0 w-full h-full -rotate-90">
-                {/* Background track circle */}
+                {/* Thin outer boundary circle */}
                 <circle
                   cx="150"
                   cy="150"
-                  r="132"
+                  r="134"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.02)"
+                  strokeWidth="2"
+                />
+                
+                {/* Inner background track circle */}
+                <circle
+                  cx="150"
+                  cy="150"
+                  r="126"
                   fill="none"
                   stroke="rgba(255, 255, 255, 0.03)"
                   strokeWidth="8"
                 />
-                {/* Active neon progress circle */}
+
+                {/* Layer 1 bloom active neon progress circle */}
                 <circle
                   cx="150"
                   cy="150"
-                  r="132"
+                  r="126"
                   fill="none"
                   stroke="url(#timer-glow-grad)"
                   strokeWidth="8"
-                  strokeDasharray="829"
-                  strokeDashoffset={829 - 829 * progress}
+                  strokeDasharray="791"
+                  strokeDashoffset={791 - 791 * progress}
                   strokeLinecap="round"
                   className="transition-all duration-300 ease-out"
                   style={{
-                    filter: "drop-shadow(0px 0px 8px rgba(251, 146, 60, 0.35))",
+                    filter: "blur(6px) opacity(0.7)",
+                  }}
+                />
+
+                {/* Layer 2 sharp active neon progress circle */}
+                <circle
+                  cx="150"
+                  cy="150"
+                  r="126"
+                  fill="none"
+                  stroke="url(#timer-glow-grad)"
+                  strokeWidth="8"
+                  strokeDasharray="791"
+                  strokeDashoffset={791 - 791 * progress}
+                  strokeLinecap="round"
+                  className="transition-all duration-300 ease-out"
+                  style={{
+                    filter: "drop-shadow(0px 0px 6px rgba(168, 85, 247, 0.4))",
                   }}
                 />
 
                 <defs>
                   <linearGradient id="timer-glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#34d399" />
-                    <stop offset="50%" stopColor="#22d3ee" />
-                    <stop offset="100%" stopColor="#fb923c" />
+                    <stop offset="0%" stopColor="#c084fc" />
+                    <stop offset="40%" stopColor="#ec4899" />
+                    <stop offset="75%" stopColor="#22d3ee" />
+                    <stop offset="100%" stopColor="#a855f7" />
                   </linearGradient>
                 </defs>
               </svg>
 
               {/* Digital core layout inside progress loop */}
               <div className="absolute flex flex-col items-center text-center">
-                <span className="text-[10px] uppercase tracking-[0.4em] text-white/35">
-                  {timerMode === "focus" ? "Active Lap" : timerMode === "shortBreak" ? "Pit Stop" : "Cooldown"}
+                <span className="text-[10px] uppercase tracking-[0.45em] bg-linear-to-r from-pink-400 to-cyan-400 bg-clip-text text-transparent font-bold">
+                  {timerMode === "focus" ? "FOCUS INJECTION" : timerMode === "shortBreak" ? "PIT STOP" : "COOLDOWN"}
                 </span>
-                <span className="font-[family:var(--font-display)] text-6xl md:text-7xl font-bold tracking-wider text-white mt-3">
+                <span className="font-[family:var(--font-display)] text-6xl md:text-7.5xl font-extrabold tracking-widest text-white mt-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.18)]">
                   {formatTimer(timerSecondsLeft)}
                 </span>
-                <span className="text-[10px] text-white/40 tracking-[0.2em] mt-3">
-                  Lap {Math.min(sessionsCompletedInCycle, 4)} / 4
+                <span className="text-[10px] text-white/40 tracking-[0.25em] mt-3">
+                  Sequence {Math.min(sessionsCompletedInCycle, 4)} / 4
                 </span>
               </div>
             </div>
 
-            {/* Core Ignition Buttons Directly Under Timer */}
-            <div className="flex items-center justify-center gap-4 mt-8">
+            {/* Core Controls Directly Under Timer */}
+            <div className="flex items-center justify-center gap-5 mt-10">
               <button
                 type="button"
                 onClick={() => handleActionClick(timerRunning ? pauseTimer : startTimer)}
-                className="flex items-center gap-3 rounded-full bg-linear-to-r from-orange-400 via-rose-500 to-cyan-400 px-8 py-3.5 font-semibold text-slate-950 shadow-[0_0_35px_rgba(255,99,71,0.25)] hover:scale-[1.03] transition text-sm"
+                className="flex items-center gap-3.5 rounded-full bg-linear-to-r from-purple-500 via-pink-500 to-cyan-400 px-9 py-4 font-bold text-slate-950 shadow-[0_0_40px_rgba(168,85,247,0.35)] hover:scale-[1.03] active:scale-[0.98] transition duration-200 text-sm"
               >
-                {timerRunning ? <Pause className="h-4 w-4 fill-slate-950" /> : <Play className="h-4 w-4 fill-slate-950" />}
+                {timerRunning ? <Pause className="h-4.5 w-4.5 fill-slate-950" /> : <Play className="h-4.5 w-4.5 fill-slate-950" />}
                 {timerRunning ? "Pause Run" : "Ignite Focus"}
               </button>
               <button
                 type="button"
                 onClick={() => handleActionClick(resetTimer)}
-                className="rounded-full border border-white/10 p-3.5 text-white/80 hover:bg-white/5 transition"
+                className="rounded-full border border-white/10 p-4 text-white/80 hover:bg-white/5 hover:scale-[1.05] transition"
                 aria-label="Reset countdown timer"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -360,7 +391,7 @@ export function WorkspaceShell() {
               <button
                 type="button"
                 onClick={() => handleActionClick(skipSession)}
-                className="rounded-full border border-white/10 p-3.5 text-white/80 hover:bg-white/5 transition"
+                className="rounded-full border border-white/10 p-4 text-white/80 hover:bg-white/5 hover:scale-[1.05] transition"
                 aria-label="Skip current session"
               >
                 <SkipForward className="h-4 w-4" />
@@ -368,15 +399,15 @@ export function WorkspaceShell() {
             </div>
           </section>
 
-          {/* RIGHT SIDEBAR: Focus Music & Daily Progress */}
-          <aside className="hidden lg:flex lg:flex-col lg:gap-4 justify-between">
+          {/* RIGHT SIDEBAR: Focus Music & Synths */}
+          <aside className="hidden lg:flex lg:flex-col lg:gap-5 justify-between">
             {/* Audio Ambience Ticker */}
-            <div className="rounded-[28px] border border-white/10 bg-slate-950/30 p-5 backdrop-blur-md">
+            <div className="rounded-[30px] border border-white/10 bg-linear-to-b from-white/5 to-transparent p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
-                <Music className="h-4 w-4 text-cyan-300" />
-                <p className="text-xs uppercase tracking-[0.2em] text-white/50">Focus Music</p>
+                <Music className="h-4 w-4 text-pink-300" />
+                <p className="text-[10px] uppercase tracking-[0.25em] text-pink-300 font-semibold">Focus Station</p>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {["Lofi Radio", "Rainfall Synth", "Ocean Deep Work", "F1 Engine Idle"].map((station) => {
                   const active = selectedMusic === station;
                   return (
@@ -384,9 +415,9 @@ export function WorkspaceShell() {
                       key={station}
                       type="button"
                       onClick={() => handleActionClick(() => setSelectedMusic(station))}
-                      className={`w-full rounded-xl border px-3.5 py-3 text-left text-xs transition ${
+                      className={`w-full rounded-2xl border px-4 py-3.5 text-left text-xs transition hover:scale-[1.02] ${
                         active
-                          ? "border-cyan-400 bg-cyan-400/10 text-white"
+                          ? "border-pink-400 bg-pink-400/10 text-white shadow-[0_0_18px_rgba(236,72,153,0.2)]"
                           : "border-white/5 bg-white/5 text-white/60 hover:bg-white/10"
                       }`}
                     >
@@ -398,31 +429,31 @@ export function WorkspaceShell() {
             </div>
 
             {/* Ambient sound chimes controls */}
-            <div className="rounded-[28px] border border-white/10 bg-slate-950/30 p-5 backdrop-blur-md">
+            <div className="rounded-[30px] border border-white/10 bg-linear-to-b from-white/5 to-transparent p-5 backdrop-blur-xl shadow-2xl">
               <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
-                <BarChart2 className="h-4 w-4 text-orange-200" />
-                <p className="text-xs uppercase tracking-[0.2em] text-white/50">Synth Engine</p>
+                <BarChart2 className="h-4 w-4 text-purple-300" />
+                <p className="text-[10px] uppercase tracking-[0.25em] text-purple-300 font-semibold">Telemetry Audio</p>
               </div>
               <button
                 type="button"
                 onClick={() =>
                   handleActionClick(() => updateSettings({ soundEnabled: !settings.soundEnabled }))
                 }
-                className={`flex w-full items-center justify-center gap-2 rounded-full border py-3 text-xs uppercase tracking-wider transition ${
+                className={`flex w-full items-center justify-center gap-2 rounded-full border py-3.5 text-xs uppercase tracking-wider transition hover:scale-[1.02] ${
                   settings.soundEnabled
-                    ? "border-orange-400 bg-orange-400/10 text-orange-200 shadow-[0_0_15px_rgba(251,146,60,0.15)]"
+                    ? "border-purple-400 bg-purple-400/10 text-purple-200 shadow-[0_0_15px_rgba(168,85,247,0.15)]"
                     : "border-white/10 bg-white/5 text-white/70"
                 }`}
               >
                 {settings.soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-                {settings.soundEnabled ? "Ambience Enabled" : "Ambience Muted"}
+                {settings.soundEnabled ? "Synth Enabled" : "Synth Muted"}
               </button>
             </div>
           </aside>
         </div>
 
         {/* BOTTOM: Horizontal telemetry stats block */}
-        <footer className="grid grid-cols-4 gap-2 border-t border-white/10 pt-6 pb-2">
+        <footer className="grid grid-cols-4 gap-3 border-t border-white/10 pt-6 pb-2 backdrop-blur-xs">
           {[
             { label: "Focused Today", value: `${todayFocusMinutes}m`, icon: Calendar },
             { label: "Focused Week", value: `${weekFocusMinutes}m`, icon: Calendar },
@@ -431,13 +462,13 @@ export function WorkspaceShell() {
           ].map((stat) => {
             const Icon = stat.icon;
             return (
-              <div key={stat.label} className="flex flex-col items-center text-center p-1">
-                <div className="flex items-center justify-center gap-1.5 text-[9px] sm:text-[11px] uppercase tracking-[0.18em] text-white/40">
+              <div key={stat.label} className="flex flex-col items-center text-center p-2 rounded-2xl bg-white/1 hover:bg-white/3 transition duration-300">
+                <div className="flex items-center justify-center gap-1.5 text-[9px] sm:text-[11px] uppercase tracking-[0.2em] text-white/40">
                   <Icon className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">{stat.label}</span>
                   <span className="sm:hidden">{stat.label.split(" ")[0]}</span>
                 </div>
-                <p className="mt-2 font-[family:var(--font-display)] text-lg sm:text-2xl text-white font-semibold">
+                <p className="mt-2 font-[family:var(--font-display)] text-lg sm:text-2xl text-white font-bold">
                   {stat.value}
                 </p>
               </div>
