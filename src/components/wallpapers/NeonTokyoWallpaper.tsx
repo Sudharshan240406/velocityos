@@ -1,4 +1,5 @@
 "use client";
+import { safeColor } from "../../utils/safeColor";
 
 import React, { useEffect, useRef } from "react";
 
@@ -77,25 +78,35 @@ export default function NeonTokyoWallpaper() {
 
       // Dark sky
       const sky = ctx.createLinearGradient(0, 0, 0, height);
-      sky.addColorStop(0, "#060010");
-      sky.addColorStop(0.6, "#0d0018");
-      sky.addColorStop(1, "#1a001a");
+      sky.addColorStop(0, safeColor("#060010"));
+      sky.addColorStop(0.6, safeColor("#0d0018"));
+      sky.addColorStop(1, safeColor("#1a001a"));
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, width, height);
 
       // Bokeh lights
+      const hexToRgba = (hex: string, alpha: number) => {
+        const cleanHex = hex.replace("#", "");
+        const r = parseInt(cleanHex.substring(0, 2), 16);
+        const g = parseInt(cleanHex.substring(2, 4), 16);
+        const bl = parseInt(cleanHex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${bl}, ${alpha})`;
+      };
+
       bokeh.forEach((b) => {
         b.alpha += b.alphaDir * b.alphaSpeed;
         if (b.alpha > 0.25 || b.alpha < 0.03) b.alphaDir *= -1;
         const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
-        grad.addColorStop(0, b.color.replace(")", `, ${b.alpha})`).replace("rgb", "rgba").replace("#", "rgba(") + "");
-        grad.addColorStop(1, "transparent");
-        // Draw simpler version
-        ctx.globalAlpha = b.alpha;
-        ctx.fillStyle = b.color;
+        const startColor = safeColor(hexToRgba(b.color, b.alpha));
+        grad.addColorStop(0, safeColor(startColor));
+        grad.addColorStop(1, safeColor("transparent"));
+        
+        ctx.save();
+        ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
       });
       ctx.globalAlpha = 1;
 
@@ -155,8 +166,8 @@ export default function NeonTokyoWallpaper() {
 
       // Ground reflections
       const reflGrad = ctx.createLinearGradient(0, height * 0.85, 0, height);
-      reflGrad.addColorStop(0, "transparent");
-      reflGrad.addColorStop(1, "rgba(255, 0, 128, 0.08)");
+      reflGrad.addColorStop(0, safeColor("transparent"));
+      reflGrad.addColorStop(1, safeColor("rgba(255, 0, 128, 0.08)"));
       ctx.fillStyle = reflGrad;
       ctx.fillRect(0, 0, width, height);
 

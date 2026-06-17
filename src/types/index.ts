@@ -16,14 +16,16 @@ export interface DailyStat {
   hourlyActivity?: Record<number, number>; // hour -> minutes
 }
 
-export type MusicTrack = "LoFi" | "Rain" | "Forest";
+export type MusicTrack = "LoFi" | "Rain" | "Forest" | "Ocean" | "Night";
 
 export type WallpaperType =
   | "aurora"
   | "cybercity"
   | "f1garage"
   | "neontokyo"
-  | "spacenebula";
+  | "spacenebula"
+  | "highway"
+  | "ocean";
 
 export interface Achievement {
   id: string;
@@ -78,6 +80,7 @@ export interface FocusState {
   notificationsEnabled: boolean;
   autoStartBreaks: boolean;
   autoStartFocus: boolean;
+  widgets: string[];
 
   // Actions
   setPreset: (name: PresetName) => void;
@@ -94,4 +97,6 @@ export interface FocusState {
   setNotificationsEnabled: (enabled: boolean) => void;
   setAutoStartBreaks: (enabled: boolean) => void;
   setAutoStartFocus: (enabled: boolean) => void;
+  toggleWidget: (id: string) => void;
+  setWidgetsOrder: (widgets: string[]) => void;
 }

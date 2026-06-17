@@ -32,6 +32,7 @@ export const useFocusStore = create<FocusState>()(
       notificationsEnabled: false,
       autoStartBreaks: false,
       autoStartFocus: false,
+      widgets: ["weather", "xp", "achievements", "music", "stats"],
 
       setPreset: (name) => {
         const preset = get().presets[name];
@@ -152,6 +153,12 @@ export const useFocusStore = create<FocusState>()(
       setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
       setAutoStartBreaks: (enabled) => set({ autoStartBreaks: enabled }),
       setAutoStartFocus: (enabled) => set({ autoStartFocus: enabled }),
+      toggleWidget: (id) => set((state) => ({
+        widgets: state.widgets.includes(id)
+          ? state.widgets.filter((w) => w !== id)
+          : [...state.widgets, id]
+      })),
+      setWidgetsOrder: (widgets) => set({ widgets }),
     }),
     {
       name: "focusos-storage",
@@ -167,6 +174,7 @@ export const useFocusStore = create<FocusState>()(
         notificationsEnabled: state.notificationsEnabled,
         autoStartBreaks: state.autoStartBreaks,
         autoStartFocus: state.autoStartFocus,
+        widgets: state.widgets,
       }),
     }
   )

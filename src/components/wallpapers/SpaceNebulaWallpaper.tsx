@@ -1,4 +1,5 @@
 "use client";
+import { safeColor } from "../../utils/safeColor";
 
 import React, { useEffect, useRef } from "react";
 
@@ -71,10 +72,10 @@ export default function SpaceNebulaWallpaper() {
 
       // Deep space background
       const bg = ctx.createLinearGradient(0, 0, width, height);
-      bg.addColorStop(0, "#000008");
-      bg.addColorStop(0.4, "#04000f");
-      bg.addColorStop(0.7, "#080010");
-      bg.addColorStop(1, "#020008");
+      bg.addColorStop(0, safeColor("#000008"));
+      bg.addColorStop(0.4, safeColor("#04000f"));
+      bg.addColorStop(0.7, safeColor("#080010"));
+      bg.addColorStop(1, safeColor("#020008"));
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
@@ -87,9 +88,9 @@ export default function SpaceNebulaWallpaper() {
         ctx.globalAlpha = cloud.alpha;
         ctx.globalCompositeOperation = "screen";
         const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, cloud.rx);
-        grad.addColorStop(0, cloud.color);
-        grad.addColorStop(0.5, cloud.color + "44");
-        grad.addColorStop(1, "transparent");
+        grad.addColorStop(0, safeColor(cloud.color));
+        grad.addColorStop(0.5, safeColor(cloud.color + "44"));
+        grad.addColorStop(1, safeColor("transparent"));
         ctx.fillStyle = grad;
         ctx.scale(1, cloud.ry / cloud.rx);
         ctx.beginPath();
@@ -134,9 +135,9 @@ export default function SpaceNebulaWallpaper() {
       const coreY = height * 0.35;
       const coreGlow = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, 120);
       const corePulse = Math.sin(frame * 0.005) * 0.5 + 0.5;
-      coreGlow.addColorStop(0, `rgba(255, 200, 100, ${0.15 + corePulse * 0.05})`);
-      coreGlow.addColorStop(0.4, "rgba(200, 100, 255, 0.04)");
-      coreGlow.addColorStop(1, "transparent");
+      coreGlow.addColorStop(0, safeColor(`rgba(255, 200, 100, ${0.15 + corePulse * 0.05})`));
+      coreGlow.addColorStop(0.4, safeColor("rgba(200, 100, 255, 0.04)"));
+      coreGlow.addColorStop(1, safeColor("transparent"));
       ctx.fillStyle = coreGlow;
       ctx.fillRect(0, 0, width, height);
 
@@ -146,8 +147,8 @@ export default function SpaceNebulaWallpaper() {
         const ssY = Math.random() * height * 0.4;
         ctx.save();
         const ssGrad = ctx.createLinearGradient(ssX, ssY, ssX + 120, ssY + 40);
-        ssGrad.addColorStop(0, "white");
-        ssGrad.addColorStop(1, "transparent");
+        ssGrad.addColorStop(0, safeColor("white"));
+        ssGrad.addColorStop(1, safeColor("transparent"));
         ctx.globalAlpha = 0.9;
         ctx.strokeStyle = ssGrad;
         ctx.lineWidth = 1.5;

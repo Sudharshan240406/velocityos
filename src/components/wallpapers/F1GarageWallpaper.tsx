@@ -1,4 +1,5 @@
 "use client";
+import { safeColor } from "../../utils/safeColor";
 
 import React, { useEffect, useRef } from "react";
 
@@ -54,9 +55,9 @@ export default function F1GarageWallpaper() {
 
       // Dark garage background
       const bg = ctx.createLinearGradient(0, 0, 0, height);
-      bg.addColorStop(0, "#080808");
-      bg.addColorStop(0.3, "#0d0a06");
-      bg.addColorStop(1, "#050402");
+      bg.addColorStop(0, safeColor("#080808"));
+      bg.addColorStop(0.3, safeColor("#0d0a06"));
+      bg.addColorStop(1, safeColor("#050402"));
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
@@ -92,9 +93,9 @@ export default function F1GarageWallpaper() {
 
       // Orange/red ground glow
       const groundGlow = ctx.createRadialGradient(width / 2, height, 0, width / 2, height, width * 0.7);
-      groundGlow.addColorStop(0, `rgba(255, 80, 0, ${0.12 + glowPulse * 0.05})`);
-      groundGlow.addColorStop(0.5, `rgba(200, 30, 0, 0.05)`);
-      groundGlow.addColorStop(1, "transparent");
+      groundGlow.addColorStop(0, safeColor(`rgba(255, 80, 0, ${0.12 + glowPulse * 0.05})`));
+      groundGlow.addColorStop(0.5, safeColor(`rgba(200, 30, 0, 0.05)`));
+      groundGlow.addColorStop(1, safeColor("transparent"));
       ctx.fillStyle = groundGlow;
       ctx.fillRect(0, 0, width, height);
 
@@ -141,8 +142,8 @@ export default function F1GarageWallpaper() {
       for (let i = 0; i < numLights; i++) {
         const lx = (width / (numLights + 1)) * (i + 1);
         const lightGlow = ctx.createRadialGradient(lx, 0, 0, lx, 0, 200);
-        lightGlow.addColorStop(0, "rgba(255, 220, 150, 0.08)");
-        lightGlow.addColorStop(1, "transparent");
+        lightGlow.addColorStop(0, safeColor("rgba(255, 220, 150, 0.08)"));
+        lightGlow.addColorStop(1, safeColor("transparent"));
         ctx.fillStyle = lightGlow;
         ctx.fillRect(0, 0, width, height);
 
@@ -155,8 +156,8 @@ export default function F1GarageWallpaper() {
 
       // Dark vignette
       const vignette = ctx.createRadialGradient(width / 2, height / 2, height * 0.2, width / 2, height / 2, width * 0.8);
-      vignette.addColorStop(0, "transparent");
-      vignette.addColorStop(1, "rgba(0,0,0,0.6)");
+      vignette.addColorStop(0, safeColor("transparent"));
+      vignette.addColorStop(1, safeColor("rgba(0,0,0,0.6)"));
       ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, width, height);
 

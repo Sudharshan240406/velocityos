@@ -5,7 +5,8 @@ import { useFocusStore } from "../store/focusStore";
 import { PresetName } from "../types";
 import { Zap, Brain, Flame, Image, Settings, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
-import XPCard from "./XPCard";
+import ProfileCard from "./ProfileCard";
+import WeatherCard from "./WeatherCard";
 
 interface SidebarProps {
   onOpenWallpaper?: () => void;
@@ -47,7 +48,7 @@ export default function Sidebar({ onOpenWallpaper, onOpenSettings, onOpenAchieve
   ];
 
   return (
-    <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] gap-5">
+    <div className="flex flex-col h-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] gap-4 overflow-y-auto max-h-[85vh] lg:max-h-[92vh]">
       {/* Header / Logo */}
       <div className="flex items-center gap-3">
         <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-600 shadow-[0_0_15px_rgba(168,85,247,0.5)]">
@@ -63,11 +64,11 @@ export default function Sidebar({ onOpenWallpaper, onOpenSettings, onOpenAchieve
         </div>
       </div>
 
-      {/* XP Card */}
-      <XPCard />
+      {/* Profile Card (Upgraded XP System) */}
+      <ProfileCard />
 
       {/* Preset Selector */}
-      <div className="flex-1 flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
           Focus Presets
         </span>
@@ -113,8 +114,11 @@ export default function Sidebar({ onOpenWallpaper, onOpenSettings, onOpenAchieve
         </div>
       </div>
 
+      {/* Weather card */}
+      <WeatherCard />
+
       {/* Bottom Actions */}
-      <div className="flex items-center gap-1 pt-3 border-t border-white/5">
+      <div className="flex items-center gap-1 pt-3 border-t border-white/5 mt-auto">
         {actionItems.map((item) => {
           const Icon = item.icon;
           return (

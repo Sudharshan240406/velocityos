@@ -238,3 +238,87 @@ export async function searchPlaylist(
 export async function playContext(token: string, contextUri: string): Promise<void> {
   await spotifyFetch("/me/player/play", token, "PUT", { context_uri: contextUri });
 }
+
+export interface SpotifyDevice {
+  id: string;
+  name: string;
+  type: string;
+  is_active: boolean;
+  is_restricted: boolean;
+  volume_percent: number;
+}
+
+export async function getDevices(token: string): Promise<SpotifyDevice[]> {
+  try {
+    const res = await spotifyFetch("/me/player/devices", token);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.devices || [];
+  } catch {
+    return [];
+  }
+}
+
+export async function transferPlayback(token: string, deviceId: string): Promise<boolean> {
+  try {
+    const res = await spotifyFetch("/me/player", token, "PUT", {
+      device_ids: [deviceId],
+      play: true
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function setSpotifyVolume(token: string, volumePercent: number): Promise<boolean> {
+  try {
+    const res = await spotifyFetch(`/me/player/volume?volume_percent=${volumePercent}`, token, "PUT");
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export interface RecentlyPlayedTrack {
+  track: {
+    id: string;
+    name: string;
+    artists: { name: string }[];
+    album: {
+      images: { url: string }[];
+    };
+  };
+  played_at: string;
+}
+
+export async function getRecentlyPlayed(token: string, limit = 10): Promise<RecentlyPlayedTrack[]> {
+  try {
+    const res = await spotifyFetch(`/me/player/recently-played?limit=${limit}`, token);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.items || [];
+  } catch {
+    return [];
+  }
+}
+
+export interface SpotifyPlaylist {
+  id: string;
+  name: string;
+  uri: string;
+  images: { url: string }[];
+  owner: { display_name: string };
+  tracks: { total: number };
+}
+
+export async function getUserPlaylists(token: string): Promise<SpotifyPlaylist[]> {
+  try {
+    const res = await spotifyFetch("/me/playlists?limit=10", token);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.items || [];
+  } catch {
+    return [];
+  }
+}

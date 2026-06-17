@@ -50,6 +50,27 @@ const WALLPAPERS: WallpaperOption[] = [
     gradient: "from-slate-900/80 via-blue-950/80 to-violet-950/80",
     description: "Drifting through the cosmos",
   },
+  {
+    id: "highway" as any,
+    label: "Night Highway",
+    emoji: "🛣️",
+    gradient: "from-orange-950/80 via-gray-900/80 to-cyan-950/80",
+    description: "Atmospheric neon traffic lines",
+  },
+  {
+    id: "ocean" as any,
+    label: "Ocean Horizon",
+    emoji: "🌅",
+    gradient: "from-cyan-950/80 via-blue-950/80 to-slate-900/80",
+    description: "Calm rolling procedural sea",
+  },
+  {
+    id: "rainforest" as any,
+    label: "Rain Forest",
+    emoji: "🌿",
+    gradient: "from-emerald-950/80 via-teal-950/80 to-green-950/80",
+    description: "Lush animated jungle mist",
+  },
 ];
 
 interface WallpaperSelectorProps {

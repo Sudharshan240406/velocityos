@@ -1,4 +1,5 @@
 "use client";
+import { safeColor } from "../../utils/safeColor";
 
 import React, { useEffect, useRef } from "react";
 
@@ -77,17 +78,17 @@ export default function CyberCityWallpaper() {
       frame++;
       // Sky
       const sky = ctx.createLinearGradient(0, 0, 0, height);
-      sky.addColorStop(0, "#010008");
-      sky.addColorStop(0.5, "#04001a");
-      sky.addColorStop(1, "#0a0020");
+      sky.addColorStop(0, safeColor("#010008"));
+      sky.addColorStop(0.5, safeColor("#04001a"));
+      sky.addColorStop(1, safeColor("#0a0020"));
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, width, height);
 
       // Distant city glow
       const glowGrad = ctx.createRadialGradient(width / 2, height * 0.6, 0, width / 2, height * 0.6, width * 0.6);
-      glowGrad.addColorStop(0, "rgba(139, 0, 255, 0.12)");
-      glowGrad.addColorStop(0.4, "rgba(255, 0, 100, 0.06)");
-      glowGrad.addColorStop(1, "transparent");
+      glowGrad.addColorStop(0, safeColor("rgba(139, 0, 255, 0.12)"));
+      glowGrad.addColorStop(0.4, safeColor("rgba(255, 0, 100, 0.06)"));
+      glowGrad.addColorStop(1, safeColor("transparent"));
       ctx.fillStyle = glowGrad;
       ctx.fillRect(0, 0, width, height);
 

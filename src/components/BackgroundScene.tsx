@@ -9,6 +9,9 @@ const CyberCityWallpaper = dynamic(() => import("./wallpapers/CyberCityWallpaper
 const F1GarageWallpaper = dynamic(() => import("./wallpapers/F1GarageWallpaper"), { ssr: false });
 const NeonTokyoWallpaper = dynamic(() => import("./wallpapers/NeonTokyoWallpaper"), { ssr: false });
 const SpaceNebulaWallpaper = dynamic(() => import("./wallpapers/SpaceNebulaWallpaper"), { ssr: false });
+const HighwayWallpaper = dynamic(() => import("./wallpapers/HighwayWallpaper"), { ssr: false });
+const OceanWallpaper = dynamic(() => import("./wallpapers/OceanWallpaper"), { ssr: false });
+const RainForestWallpaper = dynamic(() => import("./wallpapers/RainForestWallpaper"), { ssr: false });
 
 export default function BackgroundScene() {
   const { wallpaper } = useFocusStore();
@@ -18,6 +21,9 @@ export default function BackgroundScene() {
     case "f1garage":    return <F1GarageWallpaper />;
     case "neontokyo":   return <NeonTokyoWallpaper />;
     case "spacenebula": return <SpaceNebulaWallpaper />;
+    case "highway" as any:   return <HighwayWallpaper />;
+    case "ocean" as any:     return <OceanWallpaper />;
+    case "rainforest" as any: return <RainForestWallpaper />;
     case "aurora":
     default:            return <AuroraWallpaper />;
   }

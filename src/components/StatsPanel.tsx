@@ -1,27 +1,20 @@
 "use client";
 
 import React, { useState } from "react";
-import dynamic from "next/dynamic";
 import { useFocusStore } from "../store/focusStore";
-import { useGamificationStore } from "../store/gamificationStore";
-import { Clock, CheckCircle2, Flame, TrendingUp, Star, BarChart2 } from "lucide-react";
+import { useXPStore } from "../store/xpStore";
+import { Clock, CheckCircle2, Flame, TrendingUp, Star, BarChart2, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
+import WeeklyFocusChart from "./charts/WeeklyFocusChart";
+import MonthlyFocusChart from "./charts/MonthlyFocusChart";
+import SessionHeatmap from "./charts/SessionHeatmap";
 
-const FocusChart = dynamic(() => import("./FocusChart"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[180px] flex items-center justify-center">
-      <div className="w-6 h-6 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
-    </div>
-  ),
-});
-
-type TabId = "overview" | "weekly" | "monthly";
+type TabId = "overview" | "weekly" | "monthly" | "heatmap";
 
 export default function StatsPanel() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
-  const { streak, sessionsCompleted, dailyStats, totalFocusTime } = useFocusStore();
-  const { xp, level } = useGamificationStore();
+  const { dailyStats, totalFocusTime } = useFocusStore();
+  const { xp, level, currentStreak, sessionsCompleted } = useXPStore();
 
   const todayFocus =
     dailyStats.find((s) => s.date === new Date().toLocaleDateString("en-CA"))?.focusTime ?? 0;
@@ -48,12 +41,13 @@ export default function StatsPanel() {
     { id: "overview", label: "Overview", icon: BarChart2 },
     { id: "weekly", label: "Weekly", icon: TrendingUp },
     { id: "monthly", label: "Monthly", icon: Star },
+    { id: "heatmap", label: "Heatmap", icon: Calendar },
   ];
 
   const overviewStats = [
     { label: "Today's Focus", value: `${todayFocus}m`, icon: Clock, color: "text-purple-400", bg: "bg-purple-500/10" },
     { label: "Sessions Done", value: sessionsCompleted.toString(), icon: CheckCircle2, color: "text-cyan-400", bg: "bg-cyan-500/10" },
-    { label: "Current Streak", value: `${streak}d`, icon: Flame, color: "text-pink-400", bg: "bg-pink-500/10" },
+    { label: "Current Streak", value: `${currentStreak}d`, icon: Flame, color: "text-pink-400", bg: "bg-pink-500/10" },
     { label: "Productivity", value: `${productivityScore}%`, icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-500/10" },
     { label: "Level", value: `${level}`, icon: Star, color: "text-yellow-400", bg: "bg-yellow-500/10" },
     { label: "Total XP", value: `${xp}`, icon: BarChart2, color: "text-orange-400", bg: "bg-orange-500/10" },
@@ -158,7 +152,7 @@ export default function StatsPanel() {
               <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 block">
                 Activity · Last 7 Days
               </span>
-              <FocusChart mode="weekly" />
+              <WeeklyFocusChart />
             </div>
           </div>
         )}
@@ -183,8 +177,17 @@ export default function StatsPanel() {
               <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 block">
                 Monthly Summary · Last 30 Days
               </span>
-              <FocusChart mode="monthly" />
+              <MonthlyFocusChart />
             </div>
+          </div>
+        )}
+
+        {activeTab === "heatmap" && (
+          <div className="flex flex-col">
+            <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-3 block">
+              Focus Density Heatmap
+            </span>
+            <SessionHeatmap />
           </div>
         )}
       </motion.div>
